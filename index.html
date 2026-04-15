@@ -26,7 +26,7 @@
     	flex-direction: column;
     	align-items: center; 
     	justify-content: flex-start;
-   	 min-height: 100vh; /* 確保高度撐滿螢幕，標題與內容才會在中間 */        }
+   	    min-height: 100vh; /* 確保高度撐滿螢幕，標題與內容才會在中間 */        }
 /* 建立一個包覆所有內容的容器 */
 	.container {
     		width: 90%;            /* 在小螢幕時佔 90% 寬 */
@@ -54,8 +54,8 @@
 	.menu-container { 
     		flex: 2; 
     		display: grid; 
-    		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
-    		gap: 20px;    }
+    		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+    		gap: 15px;    }
 
 
         /* 便當卡片：增加現代感圓角與陰影 */
@@ -78,10 +78,16 @@
         }
 
         .item-name { 
-            font-weight: 900; 
-            font-size: 1.5em; 
-            margin-bottom: 10px; 
-            color: #222;
+			font-weight: 900; 
+    		/* 字體大小也會跟著畫面比例縮放 */
+    		font-size: clamp(1rem, 3vw, 1.4rem); 
+    		margin-bottom: 10px; 
+    		color: #222;
+    		line-height: 1.2;
+    		/* 核心設定：當空間不足時，讓後面的越文自動掉到下一行 */
+    		word-break: break-word; 
+    		overflow-wrap: break-word;
+    		min-height: 2.5em; /* 預留兩行高度，讓卡片對齊 */
         }
 
         .item-price { 
@@ -231,8 +237,12 @@
 
     /* 4. 標題縮小一點點，才不會在手機上換行 */
     .header-area h1 {
-        font-size: 1.5em !important;
-        text-align: center;
+color: var(--deep-orange);
+    margin: 0;
+    /* 使用 clamp 讓字體隨畫面寬度縮放：最小值 1.2rem，首選寬度 5%，最大 2.2rem */
+    font-size: clamp(1.2rem, 5vw, 2.2rem) !important;
+    text-align: center;
+    width: 100%;
     }
 
     </style>
