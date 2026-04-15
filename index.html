@@ -196,11 +196,27 @@
             mode: 'no-cors',
             body: JSON.stringify(payload)
         }).then(() => {
-            alert('訂購成功！');
-            cart = []; renderCart();
+  
+            // 因為用了 no-cors，fetch 無法讀取回傳值，但只要執行到這裡通常就成功了
+            alert(`🎉 訂購完成！\n工號：${empId}\n訂單已記錄至後台。`);
+            
+            // 清空畫面上的購物車
+            cart = [];
+            renderCart();
             document.getElementById('emp-id').value = '';
+            
+            // 恢復按鈕狀態
+            btn.innerText = originalText;
+            btn.disabled = false;
+        })
+        .catch(err => {
+            console.error(err);
+            alert('系統連線失敗，請檢查網路或網址是否正確。');
+            btn.innerText = originalText;
+            btn.disabled = false;
         });
     }
 </script>
+
 </body>
 </html>
