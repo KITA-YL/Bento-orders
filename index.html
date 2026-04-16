@@ -197,13 +197,17 @@
             body: JSON.stringify(payload)
         }).then(() => {
   
-            // 因為用了 no-cors，fetch 無法讀取回傳值，但只要執行到這裡通常就成功了
+         // 因為用了 no-cors，fetch 無法讀取回傳值，但只要執行到這裡通常就成功了
             alert(`🎉 訂購完成！\n工號：${empId}\n訂單已記錄至後台。`);
             
-            // 清空畫面上的購物車
-            cart = [];
-            renderCart();
-            document.getElementById('emp-id').value = '';
+        // --- 加入這行：把工號存進瀏覽器 ---
+         localStorage.setItem('savedEmpId', empId); 
+        // ------------------------------
+
+        cart = [];
+        renderCart();
+        // 注意：這裡如果你原本有清空工號欄位，可以考慮註解掉，讓它留著
+        // document.getElementById('emp-id').value = '';      
             
             // 恢復按鈕狀態
             btn.innerText = originalText;
@@ -211,6 +215,13 @@
         })
 }
 </script>
-
+        // 當網頁載入完成時執行
+        window.onload = function() {
+        const savedId = localStorage.getItem('savedEmpId');
+        if (savedId) {
+            // 如果有存過的工號，直接填入輸入框
+            document.getElementById('emp-id').value = savedId;
+        }
+    };
 </body>
 </html>
