@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>元氣食堂 - 便當訂購系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        /* 1. 配色與變數 */
         :root {
             --primary-orange: #FF9F1C;
             --deep-orange: #E76F51;
@@ -13,7 +13,6 @@
             --card-bg: #FFFFFF;
         }
 
-        
         body {  
             font-family: "Microsoft JhengHei", sans-serif; 
             background-color: var(--bg-light); 
@@ -22,7 +21,6 @@
             min-height: 100vh;
         }
 
-        /* 容器與標題 */
         .container {
             width: 95%; max-width: 1100px;
             display: flex; gap: 20px; align-items: flex-start;
@@ -33,7 +31,6 @@
             text-align: center;
         }
 
-        /* 標題彈性縮放：隨視窗寬度改變 */
         .header-area h1 {
             color: var(--deep-orange);
             margin: 0;
@@ -41,7 +38,6 @@
             line-height: 1.3;
         }
 
-        /* 選單佈局 */
         .menu-container { 
             flex: 2; 
             display: grid; 
@@ -49,7 +45,6 @@
             gap: 15px;    
         }
 
-        /* 便當卡片 */
         .item-card {
             background: var(--card-bg);
             border-radius: 18px;
@@ -60,14 +55,13 @@
             min-height: 240px; 
         }
 
-        /* 餐點名稱彈性縮放 + 換行控制 */
         .item-name { 
             font-weight: 900; 
             font-size: clamp(0.9rem, 3.5vw, 1.3rem); 
             color: #222;
             line-height: 1.3;
             margin-bottom: 10px;
-            min-height: 2.8em; /* 確保兩行高度 */
+            min-height: 2.8em; 
             word-break: break-word;
         }
 
@@ -77,7 +71,6 @@
             margin-bottom: 12px; 
         }
 
-        /* 數量與按鈕 */
         .input-group { display: flex; gap: 8px; justify-content: center; align-items: center; }
         .qty-input { width: 50px; height: 38px; text-align: center; border: 2px solid #EEE; border-radius: 8px; font-size: 1.2rem; }
         .add-btn { 
@@ -87,14 +80,12 @@
         }
         .add-btn:active { top: 4px; box-shadow: 0 0 0; }
 
-        /* 側欄購物車 */
         .sidebar { 
             flex: 1; background: white; border-radius: 20px; padding: 20px; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.08); min-width: 300px;
             border-top: 8px solid var(--primary-orange); box-sizing: border-box;
         }
 
-        /* 手機 RWD 設定 */
         @media (max-width: 768px) {
             .container { flex-direction: column; align-items: center; }
             .menu-container { width: 100%; }
@@ -112,36 +103,32 @@
         <div class="menu-container" id="menu"></div>
 
         <div class="sidebar">
-          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; font-weight: bold; border-bottom: 2px dashed #DDD; padding-bottom: 10px; margin-bottom: 15px;">
-        <span>🍱 我的點餐內容</span>
-        <span id="current-date" style="font-family: Arial, sans-serif !important; font-weight: 900 !important; color: #000 !important; font-size: 0.85em !important;"></span>
-    </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 1.3em; font-weight: bold; border-bottom: 2px dashed #DDD; padding-bottom: 10px; margin-bottom: 15px;">
+                <span>🍱 我的點餐內容</span>
+                <span id="current-date" style="font-family: Arial, sans-serif !important; font-weight: 900 !important; color: #000 !important; font-size: 0.85em !important;"></span>
+            </div>
 
-            <ul id="cart-list" style="list-style: none; padding: 0;"><li>尚無選餐...</li></ul>
-            <div style="color: var(--deep-orange); font-size: 1.8em; font-weight: 900; text-align: right; margin: 15px 0;">總計: $<span id="total-amount">0</span></div>
+            <ul id="cart-list" style="list-style: none; padding: 0; margin-bottom: 15px;"><li>尚無選餐...</li></ul>
+            <div style="text-align: right; color: var(--deep-orange); font-size: 1.8em; font-weight: 900; margin: 15px 0;">總計: $<span id="total-amount">0</span></div>
             
-     <div style="margin-bottom: 15px;">
-        <label style="font-weight:bold; color:#666; display:block; margin-bottom:5px;">員工工號</label>
-        <input type="text" id="emp-id" 
-        style="width:100%; padding:15px; font-size:1.4em; border:2px solid #EEE; border-radius:10px; box-sizing:border-box;" 
-        placeholder="請輸入工號 số nhân viên">
-    </div>
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight:bold; color:#666; display:block; margin-bottom:5px;">員工工號</label>
+                <input type="text" id="emp-id" 
+                style="width:100%; padding:15px; font-size:1.4em; border:2px solid #EEE; border-radius:10px; box-sizing:border-box;" 
+                placeholder="請輸入工號 số nhân viên">
+            </div>
             <button onclick="submitOrder()" style="background:var(--primary-orange); color:white; width:100%; padding:15px; border:none; border-radius:12px; font-size:1.3em; font-weight:bold; cursor:pointer; box-shadow:0 4px 0 #cc7e0e;">送出訂單</button>
         </div>
     </div> 
 
 <script>
-    // 1. 菜單資料
     const items = [
         { name: "隨機精選便當 hộp cơm trưa", price: 80 },
         { name: "白飯 Cơm trắng", price: 10 }
     ];
     let cart = [];
 
-    // 當網頁載入完成後執行
     window.onload = function() {
-        console.log("網頁已載入");
-        
         // 顯示今日日期
         const dateEl = document.getElementById('current-date');
         if (dateEl) {
@@ -151,22 +138,17 @@
         
         // 自動填入工號
         const savedId = localStorage.getItem('savedEmpId');
-        const empInput = document.getElementById('emp-id');
-        if (savedId && empInput) { empInput.value = savedId; }
+        if (savedId) {
+            const empInput = document.getElementById('emp-id');
+            if (empInput) empInput.value = savedId;
+        }
 
-        // 核心：顯示菜單
         renderMenu();
     };
 
     function renderMenu() {
         const menuEl = document.getElementById('menu');
-        
-        // 如果找不到 menu 標籤，就在控制台報錯，方便我們找原因
-        if (!menuEl) {
-            console.error("找不到 ID 為 'menu' 的 HTML 元素！請檢查 HTML 中是否有 <div id='menu'></div>");
-            return;
-        }
-
+        if (!menuEl) return;
         menuEl.innerHTML = items.map((item, index) => `
             <div class="item-card">
                 <div>
@@ -194,19 +176,16 @@
         const listEl = document.getElementById('cart-list');
         const totalEl = document.getElementById('total-amount');
         if (!listEl) return;
-
         if (cart.length === 0) {
             listEl.innerHTML = '<li>尚無選餐...</li>';
             if (totalEl) totalEl.innerText = '0';
             return;
         }
-
         listEl.innerHTML = cart.map((item, index) => `
             <li style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9;">
                 <span><strong>${item.name}</strong> x ${item.qty}</span>
                 <button onclick="removeFromCart(${index})" style="background:#ffeded; border:none; color:#d9534f; width:28px; height:28px; border-radius:50%; cursor:pointer;">✕</button>
             </li>`).join('');
-
         if (totalEl) totalEl.innerText = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     }
 
@@ -218,17 +197,18 @@
     function submitOrder() {
         const empInput = document.getElementById('emp-id');
         const empIdValue = empInput ? empInput.value.trim() : "";
-        const totalEl = document.getElementById('total-amount');
-        const totalAmount = totalEl ? totalEl.innerText : "0";
+        const totalAmount = document.getElementById('total-amount').innerText;
 
         if (!empIdValue) return Swal.fire('提示', '請先輸入工號喔！', 'warning');
         if (cart.length === 0) return Swal.fire('提示', '您的購物車還是空的！', 'warning');
 
-        // 先執行成功通知與清空
+        // 3. 整理訂單摘要
+        const orderSummary = cart.map(item => `${item.name.replace('\n', ' ')}x${item.qty}`).join(', ');
+
+        // 4. 先執行成功提示與清空，增加使用者體驗
         showSuccess(empIdValue);
 
-        // 背景傳送
-        const orderSummary = cart.map(item => `${item.name}x${item.qty}`).join(', ');
+        // 5. 背景傳送資料給 Google
         fetch('https://script.google.com/macros/s/AKfycbzFuSEGH1LZLHGGYMMakVR9FIMoeO7av3Gm1wLRAzCDc6VSCppBUdUgZ4UCWER5zne1_Q/exec', {
             method: 'POST',
             mode: 'no-cors',
@@ -252,6 +232,5 @@
         renderCart();
     }
 </script>
-
 </body>
 </html>
