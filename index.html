@@ -183,60 +183,63 @@
         renderCart();
     }
 
- function submitOrder() {
-        const empId = document.getElementById('emp-id');
+function submitOrder() {
+        // 1. 抓取工號與總額
+        const empInput = document.getElementById('emp-id');
+        const empId = empInput ? empInput.value.trim() : "";
         const totalAmount = document.getElementById('total-amount').innerText;
         
-        // 檢查防呆
-        if (!empId.value || cart.length === 0) return alert('請確認工號並選擇餐點！');
+        // 2. 防呆檢查
+        if (!empId) return alert('請先輸入工號喔！');
+        if (cart.length === 0) return alert('您的購物車還是空的！');
 
-        // 定義按鈕變數 (這是您漏掉的地方)
+        // 3. 定義按鈕並立即鎖定 (防止手機連點)
         const btn = document.querySelector('.submit-btn');
-        const originalText = btn.innerText;
-        
-        // 改變按鈕狀態
-        btn.innerText = "傳送訂單中...";
-        btn.disabled = true;
+        const originalText = btn ? btn.innerText : "送出訂單";
+        if (btn) {
+            btn.innerText = "傳送中...";
+            btn.disabled = true;
+        }
 
+        // 4. 準備資料
         const orderSummary = cart.map(item => `${item.name}x${item.qty}`).join(', ');
-        const payload = { empId: empId.value, orderItems: orderSummary, totalPrice: totalAmount };
+        const payload = { 
+            empId: empId, 
+            orderItems: orderSummary, 
+            totalPrice: totalAmount 
+        };
 
+        // 5. 發送 (確保網址是 https)
         fetch('https://script.google.com/macros/s/AKfycbzFuSEGH1LZLHGGYMMakVR9FIMoeO7av3Gm1wLRAzCDc6VSCppBUdUgZ4UCWER5zne1_Q/exec', {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify(payload)
         })
         .then(() => {
-            alert(`🎉 訂購完成！\n工號：${empId.value}\n訂單已記錄至後台。`);
+            alert(`🎉 訂購完成！\n工號：${empId}\n訂單已記錄至後台。`);
             
-            // 存入工號供下次使用
-            localStorage.setItem('savedEmpId', empId.value); 
+            // 存入手機本機儲存空間
+            localStorage.setItem('savedEmpId', empId); 
 
+            // 清空購物車
             cart = [];
             renderCart();
             
-            // 恢復按鈕狀態
-            btn.innerText = originalText;
-            btn.disabled = false;
+            // 恢復按鈕
+            if (btn) {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         })
         .catch(err => {
-            console.error(err);
-            alert('系統連線失敗，請稍後再試。');
-            btn.innerText = originalText;
-            btn.disabled = false;
+            console.error('Error:', err);
+            alert('傳送失敗，請檢查網路連線');
+            if (btn) {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
         });
     }
-
-    // --- 保持您的 window.onload 不變 ---
-    window.onload = function() {
-        const savedId = localStorage.getItem('savedEmpId');
-        if (savedId) {
-            const empInput = document.getElementById('emp-id');
-            if (empInput) {
-                empInput.value = savedId;
-            }
-        }
-    };
 
 </script>
 
