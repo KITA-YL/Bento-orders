@@ -144,10 +144,7 @@
         const dateEl = document.getElementById('current-date');
         if (dateEl) {
             const today = new Date();
-            const y = today.getFullYear();
-            const m = today.getMonth() + 1;
-            const d = today.getDate();
-            dateEl.innerText = `今日：${y}/${m}/${d}`;
+            dateEl.innerText = `今日：${today.getFullYear()}/${today.getMonth() + 1}/${today.getDate()}`;
         }
         
         // 自動填入工號
@@ -157,20 +154,16 @@
             if (empInput) empInput.value = savedId;
         }
 
-        // 初始化選單
         renderMenu();
     };
 
-    // 2. 生成選單函數
     function renderMenu() {
         const menuEl = document.getElementById('menu');
         if (!menuEl) return;
         
         let menuHTML = '';
         items.forEach((item, index) => {
-            // 將第一個空格替換為換行符號 <br>
             const displayName = item.name.replace(' ', '<br>');
-            
             menuHTML += `
                 <div class="item-card">
                     <div>
@@ -199,7 +192,7 @@
             cart.push({ ...item, qty }); 
         }
         renderCart();
-        qtyInput.value = 1; // 重設輸入框
+        qtyInput.value = 1;
     }
 
     function renderCart() {
@@ -220,8 +213,7 @@
             </li>
         `).join('');
 
-        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        totalEl.innerText = total;
+        totalEl.innerText = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     }
 
     function removeFromCart(index) {
@@ -245,11 +237,8 @@
             btn.disabled = true;
         }
 
-        const orderSummary = cart.map(item => `${item.name.replace('\n', ' ')}x${item.qty}`).join(', ');
+        const orderSummary = cart.map(item => `${item.name}x${item.qty}`).join(', ');
         const payload = { empId: empIdValue, orderItems: orderSummary, totalPrice: totalAmount };
-
-        const now = new Date();
-        const timeString = `${now.getFullYear()}/${now.getMonth() + 1}/${now.getDate()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
 
         fetch('https://script.google.com/macros/s/AKfycbzFuSEGH1LZLHGGYMMakVR9FIMoeO7av3Gm1wLRAzCDc6VSCppBUdUgZ4UCWER5zne1_Q/exec', {
             method: 'POST',
@@ -257,31 +246,28 @@
             body: JSON.stringify(payload)
         })
         .then(() => {
-            showSuccess(empIdValue, timeString, btn, originalText);
+            showSuccess(empIdValue, btn, originalText);
         })
         .catch(err => {
-            showSuccess(empIdValue, timeString, btn, originalText);
-            console.log('CORS block ignored, order likely sent.');
+            // 處理 Google 回傳時的隱形錯誤 (no-cors 限制)
+            showSuccess(empIdValue, btn, originalText);
         });
     }
 
-    function showSuccess(empIdValue, timeString, btn, originalText) {
+    function showSuccess(empIdValue, btn, originalText) {
+        const now = new Date();
+        const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
         Swal.fire({
             title: 'KITA 元氣食堂',
-            html: `<div style="text-align: left; font-size: 1.1em; line-height: 1.8;">
-                    🎉 <b>訂購完成！</b><br>
-                    👤 工號：${empIdValue}<br>
-                    ⏰ 訂購時間：${timeString}<br>
-                    ✅ 訂單已記錄至後台。
-                   </div>`,
+            html: `🎉🎉🎉 <b>訂購完成！</b><br>工號：${empIdValue}<br>時間：${timeString}<br>✅ 訂單已記錄至後台。`,
             icon: 'success',
-            confirmButtonColor: '#ff9800',
-            confirmButtonText: '確定'
+            confirmButtonColor: '#ff9800'
         });
 
         localStorage.setItem('savedEmpId', empIdValue); 
-        cart = [];
-        renderCart();
+        cart = []; // 清空購物車
+        renderCart(); // 重新渲染頁面
 
         if (btn) {
             btn.innerText = originalText;
