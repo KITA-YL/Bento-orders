@@ -213,15 +213,16 @@
             btn.innerText = originalText;
             btn.disabled = false;
         })
-}
-</script>
-        // 當網頁載入完成時執行
+               // 當網頁載入完成時執行
         window.onload = function() {
         const savedId = localStorage.getItem('savedEmpId');
         if (savedId) {
             // 如果有存過的工號，直接填入輸入框
             document.getElementById('emp-id').value = savedId;
         })
-    }
+
+</script>
+ 
+    };
 </body>
 </html>
