@@ -184,44 +184,51 @@
     }
 
 function submitOrder() {
-        // 1. 抓取工號與總額
+        // 1. 強制從文件抓取最新值 (解決手機緩存問題)
         const empInput = document.getElementById('emp-id');
-        const empId = empInput ? empInput.value.trim() : "";
+        const empIdValue = empInput ? empInput.value.trim() : "";
         const totalAmount = document.getElementById('total-amount').innerText;
         
-        // 2. 防呆檢查
-        if (!empId) return alert('請先輸入工號喔！');
-        if (cart.length === 0) return alert('您的購物車還是空的！');
+        // 2. 防呆檢查 (手機連點預防)
+        if (!empIdValue) {
+            alert('請先輸入工號喔！');
+            return;
+        }
+        if (cart.length === 0) {
+            alert('您的購物車還是空的！');
+            return;
+        }
 
-        // 3. 定義按鈕並立即鎖定 (防止手機連點)
+        // 3. 獲取按鈕狀態並鎖定 (避免手機重複發送)
         const btn = document.querySelector('.submit-btn');
-        const originalText = btn ? btn.innerText : "送出訂單";
+        let originalText = "送出訂單";
         if (btn) {
+            originalText = btn.innerText;
             btn.innerText = "傳送中...";
             btn.disabled = true;
         }
 
-        // 4. 準備資料
+        // 4. 準備傳送資料
         const orderSummary = cart.map(item => `${item.name}x${item.qty}`).join(', ');
         const payload = { 
-            empId: empId, 
+            empId: empIdValue, 
             orderItems: orderSummary, 
             totalPrice: totalAmount 
         };
 
-        // 5. 發送 (確保網址是 https)
+        // 5. 正式發送
         fetch('https://script.google.com/macros/s/AKfycbzFuSEGH1LZLHGGYMMakVR9FIMoeO7av3Gm1wLRAzCDc6VSCppBUdUgZ4UCWER5zne1_Q/exec', {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify(payload)
         })
         .then(() => {
-            alert(`🎉 訂購完成！\n工號：${empId}\n訂單已記錄至後台。`);
+            alert(`🎉 訂購完成！\n工號：${empIdValue}\n訂單已記錄至後台。`);
             
-            // 存入手機本機儲存空間
-            localStorage.setItem('savedEmpId', empId); 
+            // 存入手機 localStorage
+            localStorage.setItem('savedEmpId', empIdValue); 
 
-            // 清空購物車
+            // 清空資料
             cart = [];
             renderCart();
             
@@ -232,8 +239,8 @@ function submitOrder() {
             }
         })
         .catch(err => {
-            console.error('Error:', err);
-            alert('傳送失敗，請檢查網路連線');
+            console.error(err);
+            alert('傳送發生錯誤，請檢查網路或稍後再試。');
             if (btn) {
                 btn.innerText = originalText;
                 btn.disabled = false;
